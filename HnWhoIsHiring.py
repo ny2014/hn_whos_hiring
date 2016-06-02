@@ -7,7 +7,9 @@ import re   # regex
 from bs4 import BeautifulSoup # html encoding
 import urlmarker # find url from text
 
-listingUrl = 'https://hacker-news.firebaseio.com/v0/item/11611867.json'
+# URL: https://news.ycombinator.com/item?id=11611867
+# API: https://github.com/HackerNews/API
+listingUrl = 'https://hacker-news.firebaseio.com/v0/item/11814828.json'
 baseCommentUrl = 'https://hacker-news.firebaseio.com/v0/item/'
 
 response = requests.get(listingUrl)
@@ -24,12 +26,14 @@ for commentId in commentIter:
 	commentResponse = requests.get(baseCommentUrl +  str(commentId) + ".json")
 	jsonComment = json.loads(commentResponse.text)
 
-	if ('text' in jsonComment):
+	if('text' in jsonComment):
 		validJsonComment = (BeautifulSoup(jsonComment['text'], 'lxml'))
 		encodedComment = validJsonComment.encode('utf-8')
 
 		titleLine = encodedComment.split('</p>')
-		textBlock = titleLine[1]
+		textBlock = ""
+		if(1 < len(titleLine)):
+			textBlock = titleLine[1]
 
 		url = ""
 		urls = re.findall(urlmarker.WEB_URL_REGEX, str(titleLine[0])) # need to convert the return value to string
@@ -67,7 +71,8 @@ for commentId in commentIter:
 		if (len(re.sub("<.*?>", "", fields[0])) < 50): 
 			companyName = re.sub("<.*?>", "", fields[0])
 		else: 
-			textBlock = titleLine[0] + titleLine[1]
+			if(1 < len(titleLine)):
+				textBlock = titleLine[0] + titleLine[1]
 
 		#print "COMPANY=" + companyName
 		#print "JOB TITLE=" + jobTitle
